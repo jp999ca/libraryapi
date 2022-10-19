@@ -36,11 +36,13 @@ export class BookListComponent implements OnInit, AfterViewInit {
     if (value != null) {
       forkJoin([
         this.books.getBooks(this.currentLibrary.libraryId),
-        this.books.getAvailableBooks(this.currentLibrary.libraryId)
+        this.books.getCheckedOutBooks(this.currentLibrary.libraryId)
       ])
         .pipe(
-          map(([books, availableBooks]) => {
-            return unionBy(lmap(availableBooks, (book: Book) => ({ ...book, isAvailable: true })), books, 'bookId');
+          map(([books, checkedOutBooks]) => {
+            return lmap(books, (book: Book) => ({ 
+              ...book, 
+              isAvailable: checkedOutBooks.find(checkedOutBook => checkedOutBook.bookId == book.bookId)? false: true }));
           })
         )
         .subscribe((books: Book []) => {
